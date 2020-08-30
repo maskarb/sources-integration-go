@@ -7,15 +7,11 @@ import (
 	"os"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/google/uuid"
-	"github.com/maskarb/sources-integration/utils"
+	"github.com/maskarb/sources-integration-go/utils"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
 var TOPIC = getEnv("SOURCES_TOPIC", "platform.sources.event-stream")
-var EVENTTYPES = []string{
-	"Application.create", "Application.destroy", "Authentication.create", "Authentication.update", "Source.update", "Source.destroy",
-}
 
 type KafkaEvent struct {
 	EventType  string `json:"event_type"`
@@ -24,24 +20,6 @@ type KafkaEvent struct {
 	ResourceID int `json:"resource_id"`
 	SourceID   int `json:"source_id"`
 	AuthHeader string
-}
-
-type Source struct {
-	tableName        struct{}  `pg:"api_sources"`
-	ID               int       `pg:"source_id"` // Id is automatically detected as primary key
-	SourceUUID       uuid.UUID `pg:"source_uuid"`
-	Name             string
-	AuthHeader       string
-	Offset           int
-	AccountID        int
-	SourceType       string
-	Authentication   struct{}
-	BillingSource    struct{}
-	KokuUUID         string `pg:"koku_uuid"`
-	PendingDelete    bool
-	PendingUpdate    bool
-	OutOfOrderDelete bool
-	Status           struct{}
 }
 
 func getSource(db pg.DB, msgValue KafkaEvent) Source {
@@ -129,10 +107,10 @@ func main() {
 				*msg.TopicPartition.Topic, msg.TopicPartition.Partition, msg.TopicPartition.Offset, string(msg.Value))
 			fmt.Println(msgValue)
 			fmt.Println()
-			if msgValue.EventType == "Application.create" {
-				source := getSource(*db, msgValue)
-				fmt.Println(source)
-			}
+			// if msgValue.EventType == "Application.create" {
+			// 	source := getSource(*db, msgValue)
+			// 	fmt.Println(source)
+			// }
 		} else {
 			// The client will automatically try to recover from all errors.
 			fmt.Printf("Consumer error: %v (%v)\n", err, msg)

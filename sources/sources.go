@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/maskarb/sources-integration/postgres"
+	"github.com/maskarb/sources-integration-go/postgres"
 )
 
 type Source struct {

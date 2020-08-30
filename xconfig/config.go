@@ -19,7 +19,8 @@ type Config struct {
 	Service string
 	Env     string
 
-	PGMain *Postgres `yaml:"pg_main"`
+	PGMain    *Postgres `yaml:"pg_main"`
+	KafkaMain *Kafka    `yaml:"sources_listener"`
 
 	Uptrace struct {
 		DSN string `yaml:"dsn"`
@@ -84,7 +85,7 @@ func findAppDir(appDir, env string) string {
 }
 
 func joinPath(appDir, env string) string {
-	return filepath.Join(appDir, "config", env+".yml")
+	return filepath.Join(appDir, "config", env+".yaml")
 }
 
 func parseConfig(b []byte) (*Config, error) {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/pgext"
-	"github.com/maskarb/sources-integration/xconfig"
+	"github.com/maskarb/sources-integration-go/xconfig"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 
 func PGMain() *pg.DB {
 	pgMainOnce.Do(func() {
-		pgMain = NewPostgres(Config.PGMain, hasPgbouncer())
+		pgMain = NewPostgres(*xconfig.Config.PGMain, hasPgbouncer())
 	})
 	return pgMain
 }
@@ -28,13 +28,13 @@ var (
 
 func PGMainTx() *pg.DB {
 	pgMainTxOnce.Do(func() {
-		pgMainTx = NewPostgres(Config.PGMain, false)
+		pgMainTx = NewPostgres(*xconfig.Config.PGMain, false)
 	})
 	return pgMainTx
 }
 
 func hasPgbouncer() bool {
-	switch Config.Env {
+	switch xconfig.Config.Env {
 	case "test", "dev":
 		return false
 	default:
