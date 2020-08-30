@@ -1,0 +1,5 @@
+pg_main:
+  addr: "localhost:15432"
+  user: "postgres"
+  password: "postgres"
+  database: "postgres"
