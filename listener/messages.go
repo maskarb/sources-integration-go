@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/maskarb/sources-integration-go/xconfig"
 )
 
 type KafkaEvent struct {
@@ -17,20 +16,13 @@ type KafkaEvent struct {
 	AuthHeader string
 }
 
-func NewConsumer(cfg *xconfig.Kafka) *kafka.Consumer {
-	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": cfg.Addr,
-		"group.id":          cfg.GroupID,
-		"auto.offset.reset": "earliest",
-	})
-
-	if err != nil {
-		panic(err)
+func getHeader(headers []kafka.Header, header string) (string, error) {
+	for _, head := range headers {
+		if head.Key == header {
+			return string(head.Value), nil
+		}
 	}
-
-	c.SubscribeTopics([]string{cfg.Topic, "^aRegex.*[Tt]opic"}, nil)
-
-	return c
+	return "", errors.New(header + " not found in headers")
 }
 
 func GetMsgData(msg *kafka.Message) KafkaEvent {
@@ -50,13 +42,4 @@ func GetMsgData(msg *kafka.Message) KafkaEvent {
 		panic(err)
 	}
 	return msgValue
-}
-
-func getHeader(headers []kafka.Header, header string) (string, error) {
-	for _, head := range headers {
-		if head.Key == header {
-			return string(head.Value), nil
-		}
-	}
-	return "", errors.New(header + " not found in headers")
 }

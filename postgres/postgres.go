@@ -16,7 +16,7 @@ var (
 
 func PGMain() *pg.DB {
 	pgMainOnce.Do(func() {
-		pgMain = NewPostgres(*xconfig.Config.PGMain, hasPgbouncer())
+		pgMain = NewPostgres(xconfig.Config.PGMain, hasPgbouncer())
 	})
 	return pgMain
 }
@@ -28,7 +28,7 @@ var (
 
 func PGMainTx() *pg.DB {
 	pgMainTxOnce.Do(func() {
-		pgMainTx = NewPostgres(*xconfig.Config.PGMain, false)
+		pgMainTx = NewPostgres(xconfig.Config.PGMain, false)
 	})
 	return pgMainTx
 }

@@ -7,4 +7,4 @@ pg_main:
 sources_listener:
   addr: "localhost:29091"
   topic: "platform.sources.event-stream"
-  group_id: "hccm-sources"
+  groupid: "hccm-sources"
