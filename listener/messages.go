@@ -1,19 +1,24 @@
 package listener
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/segmentio/kafka-go"
 )
 
 type KafkaEvent struct {
-	EventType  string `json:"event_type"`
-	Offset     kafka.Offset
-	Partition  int32
-	ResourceID int `json:"resource_id"`
-	SourceID   int `json:"source_id"`
-	AuthHeader string
+	Offset    int64
+	Partition int
+	Topic     string
+
+	EventType   string      `json:"event_type"`
+	ResourceID  int         `json:"resource_id"`
+	SourceID    int         `json:"source_id"`
+	AuthType    string      `json:"authtype"`
+	AuthHeader  *AuthHeader `json:"auth_header"`
+	EncodedAuth string
 }
 
 func getHeader(headers []kafka.Header, header string) (string, error) {
@@ -25,21 +30,33 @@ func getHeader(headers []kafka.Header, header string) (string, error) {
 	return "", errors.New(header + " not found in headers")
 }
 
-func GetMsgData(msg *kafka.Message) KafkaEvent {
-	msgValue := KafkaEvent{}
-	msgValue.Offset = msg.TopicPartition.Offset
-	msgValue.Partition = msg.TopicPartition.Partition
-	err := json.Unmarshal(msg.Value, &msgValue)
+func GetMsgData(m *kafka.Message) KafkaEvent {
+	msg := KafkaEvent{
+		Offset:    m.Offset,
+		Partition: m.Partition,
+		Topic:     m.Topic,
+	}
+
+	err := json.Unmarshal(m.Value, &msg)
 	if err != nil {
 		panic(err)
 	}
-	msgValue.EventType, err = getHeader(msg.Headers, "event_type")
+	msg.EventType, err = getHeader(m.Headers, "event_type")
 	if err != nil {
 		panic(err)
 	}
-	msgValue.AuthHeader, err = getHeader(msg.Headers, "x-rh-identity")
+	msg.EncodedAuth, err = getHeader(m.Headers, "x-rh-identity")
 	if err != nil {
 		panic(err)
 	}
-	return msgValue
+	data, err := base64.StdEncoding.DecodeString(msg.EncodedAuth)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(data, &msg.AuthHeader)
+	if err != nil {
+		panic(err)
+	}
+
+	return msg
 }

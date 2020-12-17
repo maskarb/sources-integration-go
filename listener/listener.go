@@ -1,22 +1,16 @@
 package listener
 
 import (
-	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/maskarb/sources-integration-go/xconfig"
+	"github.com/segmentio/kafka-go"
 )
 
-func NewConsumer(cfg *xconfig.Kafka) *kafka.Consumer {
-	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": cfg.Addr,
-		"group.id":          cfg.GroupID,
-		"auto.offset.reset": "earliest",
+func NewConsumer() *kafka.Reader {
+	// make a new reader that consumes from topic-A
+	return kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  []string{"localhost:29091"},
+		GroupID:  "hccm-sources",
+		Topic:    "platform.sources.event-stream",
+		MinBytes: 10e0, // 10KB
+		MaxBytes: 10e6, // 10MB
 	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	c.SubscribeTopics([]string{cfg.Topic, "^aRegex.*[Tt]opic"}, nil)
-
-	return c
 }

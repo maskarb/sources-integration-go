@@ -1,16 +1,16 @@
-package blog
+package sources
 
 import (
 	"context"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
-	"github.com/maskarb/sources-integration-go/postgres"
 )
 
 type Source struct {
 	tableName struct{} `pg:"api_sources"`
 
-	ID               uint64    `pg:"source_id"` // Id is automatically detected as primary key
+	ID               int       `pg:"source_id,pk"` // Id is automatically detected as primary key
 	SourceUUID       uuid.UUID `pg:"source_uuid"`
 	Name             string
 	AuthHeader       string
@@ -26,9 +26,9 @@ type Source struct {
 	Status           struct{}
 }
 
-func SelectSource(c context.Context, sourceID uint64) (*Source, error) {
+func SelectSource(c context.Context, db *pg.DB, sourceID int) (*Source, error) {
 	source := new(Source)
-	if err := postgres.PGMain().ModelContext(c, source).
+	if err := db.ModelContext(c, source).
 		Where("source_id = ?", sourceID).
 		Select(); err != nil {
 		return nil, err

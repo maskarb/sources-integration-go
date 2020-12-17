@@ -42,9 +42,9 @@ func GetSourceData(resp *http.Response) map[string]interface{} {
 	return data
 }
 
-func GetSourceDetails(sourceID uint64) SourceDetails {
+// func GetSourceDetails(sourceID uint64) SourceDetails {
 
-}
+// }
 
 func main() {
 	client := &http.Client{}
